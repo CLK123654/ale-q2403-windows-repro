@@ -1,5 +1,5 @@
-1.在MATLAB中加入output/matlab路径
-2.调用verify_cache_fill_glm读取input_data并重建results
-3.检查fold_metrics.csv中的三个前向折
-4.核对selected_coefficients.csv与时间缩放结果
-5.确认报告只使用关联和预测表述
+在MATLAB中读取cache_fill_bins.csv和model_contract.json
+按时间顺序生成缓存压力与填充请求历史特征
+使用IRLS拟合三个带offset的Poisson模型
+依次计算前向留出deviance并选择模型
+用全量数据重估所选模型并导出业务交付物

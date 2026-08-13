@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "skill": "humanizer-zh",
+  "result": "PASS",
+  "reviewed_scopes": [
+    "任务名称",
+    "任务概要",
+    "任务prompt",
+    "关键动作",
+    "评分表",
+    "环境依赖",
+    "软件步骤",
+    "输入材料中的自然语言",
+    "Reference中的用户可见文字",
+    "关键标准答案工作簿全部自然语言",
+    "任务规格工作簿全部自然语言"
+  ],
+  "scores": {
+    "直接性": 10,
+    "节奏": 9,
+    "信任度": 9,
+    "真实性": 9,
+    "精炼度": 9,
+    "total": 46
+  },
+  "minimum_total": 45,
+  "notes": [
+    "标题直接写容量组的预测复核，没有因果强度、审计矩阵或模型证明等夸大词。",
+    "题面从内容分发平台的填充策略评审切入，输入由容量组提供，数据口径和参数均来自CSV及模型合同。",
+    "Reference删除Python重放器、测试脚本、validation和固定通过结论，只保留MATLAB程序、业务结果和预测评估说明。",
+    "程序只支持当前观测窗内的关联与预测比较，业务消费者及后续线上试验边界清楚。",
+    "任务规格围绕MATLAB时序特征、PoissonIRLS、前向留出、全量重估和时间缩放逐项设计。"
+  ],
+  "reviewed_artifacts_sha256": {
+    "ALE-专家数据作业表_q2403.csv": "7a016162d9dccb733ffc71946f1b66292720072b8f1390592d9d80a40526b327",
+    "reference.zip": "02ccf57d8305ba8e799c73cadbff084eb6484adc6723783c5794b6c5bfa3f458",
+    "task_fields.json": "c46af93f00609fb40f601d6614b8a3a04443621362bc1770eb1baa106628f156",
+    "任务prompt.txt": "cf4ab78a1e1767686e7b757ad1352aa734a8907c02d78fb9fdf580849b774f30",
+    "任务名称.txt": "056dac7cd088d81d304b6499462c38c53933e48beb83f3fd354ac72891703df7",
+    "任务概要.txt": "67ac876ac87c98cb631d8efe31ccb1f3759f457c99d92cb47574922f83da3f87",
+    "任务规格转化.xlsx": "88ff24ff09383e073178f1dbe47f298e34b8fe7baa36ad09c72356001177a673",
+    "关键动作.txt": "5478fa4d6ad8aa15a4bc3fcb2e89d4028808214654d30dcdabed0f093b253c5a",
+    "关键标准答案.xlsx": "4c2dbaea2bb66e9a80cc9fb0b307136e7c281ec4b83ae41fd1ba179678566ae9",
+    "环境依赖.txt": "d627f5217777d534529bcb0d7371cff6bb07be0c523b2ea0f76718762a9a2479",
+    "相关专业软件的关键步骤.txt": "693d1a91aa5ab1f288cab6d3d4cf62abaa8d9b7c871c78d616cd17c5082979d0",
+    "评分表.txt": "17fbc7bf6ba18b8d0134986ae18adc140050d0814199904f3c135f0c83431bf1",
+    "输入数据包.zip": "467a618ba14df7a526f114f3f48cc73a4d8e65d81c75485069db78ff08972879"
+  },
+  "online_ai_field_used_as_conclusion": false
+}

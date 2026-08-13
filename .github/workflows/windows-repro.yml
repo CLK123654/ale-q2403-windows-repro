@@ -2,8 +2,15 @@ name: q2403-windows-repro
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+    inputs:
+      mode:
+        description: Workflow mode
+        required: true
+        default: reference
+        type: choice
+        options:
+          - reference
+          - verify
 
 permissions:
   contents: read
@@ -20,17 +27,39 @@ jobs:
       - uses: matlab-actions/setup-matlab@v3
         with:
           release: R2025b
-      - name: Run MATLAB task smoke
+      - name: Record Windows host
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force evidence | Out-Null
+          Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | ConvertTo-Json | Set-Content -Encoding utf8NoBOM evidence/windows-host.json
+      - name: Generate Reference candidate
+        if: ${{ inputs.mode == 'reference' }}
         uses: matlab-actions/run-command@v3
         with:
-          command: disp(version); assert(~isempty(ver));
-      - name: Verify four attachments and two clean directories
+          command: addpath(fullfile(pwd,'qa')); generate_reference
+      - name: Copy Reference evidence
+        if: ${{ inputs.mode == 'reference' }}
         shell: pwsh
-        run: python ./qa/verify_attachments.py
-      - name: Execute primary software smoke
-        if: ${{ always() }}
+        run: Copy-Item reference-candidate.zip evidence/reference-candidate.zip
+      - name: Verify attachment hashes
+        if: ${{ inputs.mode == 'verify' }}
         shell: pwsh
-        run: ./qa/software_smoke.ps1
+        run: python qa/verify_hashes.py
+      - name: Block MATLAB outbound network
+        if: ${{ inputs.mode == 'verify' }}
+        shell: pwsh
+        run: |
+          $matlab = (Get-Command matlab).Source
+          New-NetFirewallRule -DisplayName ALE-Q2403-MATLAB-OUT -Direction Outbound -Program $matlab -Action Block | Out-Null
+      - name: Execute official MATLAB workflow
+        if: ${{ inputs.mode == 'verify' }}
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath(fullfile(pwd,'qa')); verify_q2403
+      - name: Remove firewall rule
+        if: always()
+        shell: pwsh
+        run: Remove-NetFirewallRule -DisplayName ALE-Q2403-MATLAB-OUT -ErrorAction SilentlyContinue
       - name: Upload independent evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -38,3 +67,4 @@ jobs:
           name: q2403-windows-evidence
           path: evidence/**
           if-no-files-found: error
+          retention-days: 1

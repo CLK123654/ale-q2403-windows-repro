@@ -1,1 +1,5 @@
-输入包提供24秒观测窗内的缓存压力和填充事件，以及三个候选模型和前向验证折。请用MATLAB构造只使用历史bin的特征，带log bin宽度offset拟合Poisson模型，比较留出时段deviance并选择模型。用全量拟合结果生成条件强度、时间缩放诊断和系数表。结论只讨论时序关联与预测误差。
+内容分发平台容量组正在复核边缘节点的缓存填充请求预测。输入数据包包含按5ms汇总的观测数据、模型合同和上轮留下的MATLAB程序，三个文件都需要使用。
+
+请先核对bin顺序和输入字段，再修正现有程序。历史特征只能读取当前bin之前的请求记录，Poisson模型按合同使用offset和ridge设置。依次完成三个候选模型的前向留出拟合，以平均留出deviance选择模型，然后用全量数据重新估计系数并生成时间缩放结果。
+
+交付可在MATLAB中直接运行的程序、fold_metrics.csv、model_summary.csv、selected_coefficients.csv、rescaled_dispatches.csv、ks_diagnostic.csv和PREDICTION_REVIEW.md。说明中写清模型选择、主要预测指标及业务用途。容量组将据此决定是否继续评估近期请求特征。

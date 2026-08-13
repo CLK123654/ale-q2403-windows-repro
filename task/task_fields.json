@@ -1,11 +1,21 @@
 {
   "题目ID": "2403",
-  "任务名称": "缓存填充请求的时序关联与回源预测",
-  "任务概要": "边缘节点需要判断缓存压力和近期填充事件能否改善回源请求预测。任务使用按时间排列的计数数据比较三个点过程模型，不作因果解释。",
-  "任务prompt‼️": "输入包提供24秒观测窗内的缓存压力和填充事件，以及三个候选模型和前向验证折。请用MATLAB构造只使用历史bin的特征，带log bin宽度offset拟合Poisson模型，比较留出时段deviance并选择模型。用全量拟合结果生成条件强度、时间缩放诊断和系数表。结论只讨论时序关联与预测误差。",
-  "关键动作": "保持bin顺序并构造三个不读取未来数据的历史特征\n使用IRLS拟合带offset的Poisson模型且不惩罚截距\n在三个前向折上计算各模型deviance\n按平均deviance选择模型并在全量数据上重估\n生成时间缩放诊断并把关联结论与因果解释分开",
-  "评分表（直接输入内容或使用txt文档）‼️": "总分100分。\n\n1.时间顺序、历史窗口和offset处理正确（25分）\n2.PoissonIRLS与ridge实现符合合同（25分）\n3.三个前向折及模型选择结果正确（20分）\n4.系数、重缩放事件和KS诊断与Reference数值一致（20分）\n5.报告没有因果措辞且能由MATLAB重建（10分）",
-  "本项任务的环境依赖": "主软件为MATLABR2025b，使用Windows11官方桌面版或命令行批处理运行。\n\n安装阶段可以联网取得主软件和锁定依赖，正式复现只读取题目输入并使用本机回环连接。辅助工具为PowerShell、Git和文本编辑器；公开仓库不包含凭据，许可按各软件原许可执行。\n\n建议准备2核CPU、4GB内存和2GB可用磁盘。权限限制为输入目录只读，程序只能写入指定工作目录；单次执行超时为15分钟，人工完成预计4至8小时。\n\n主要风险是当前或未来调度事件泄漏进历史特征、遗漏Poisson offset、对截距施加ridge、跨fold复用系数、用训练指标选模、时间缩放区间重叠，以及把跨平台浮点尾差误判为模型错误。",
-  "相关专业软件的关键步骤": "1.在MATLAB中加入output/matlab路径\n2.调用verify_cache_fill_glm读取input_data并重建results\n3.检查fold_metrics.csv中的三个前向折\n4.核对selected_coefficients.csv与时间缩放结果\n5.确认报告只使用关联和预测表述",
-  "涉及的专业软件": "MATLAB"
+  "任务名称": "边缘缓存填充请求预测复核",
+  "学科一级分类": "Computing, Data & Mathematical Sciences 计算、数据与数学科学",
+  "学科二级分类": "数据与分析工程",
+  "题目难度": "高",
+  "任务概要": "内容分发平台准备调整边缘节点的缓存填充策略，容量组需要先比较缓存压力和近期填充请求记录对后续请求预测的作用。工程师使用MATLAB按时间顺序拟合Poisson模型，交付前向留出结果、模型系数、重缩放结果和预测评估说明，供容量组评审下一轮策略。",
+  "涉及的专业软件": "MATLAB",
+  "包含的操作类型": [
+    "领域专业软件操作",
+    "文件和数据处理",
+    "脚本/命令/程序化处理",
+    "结果验证"
+  ],
+  "任务prompt‼️": "内容分发平台容量组正在复核边缘节点的缓存填充请求预测。输入数据包包含按5ms汇总的观测数据、模型合同和上轮留下的MATLAB程序，三个文件都需要使用。\n\n请先核对bin顺序和输入字段，再修正现有程序。历史特征只能读取当前bin之前的请求记录，Poisson模型按合同使用offset和ridge设置。依次完成三个候选模型的前向留出拟合，以平均留出deviance选择模型，然后用全量数据重新估计系数并生成时间缩放结果。\n\n交付可在MATLAB中直接运行的程序、fold_metrics.csv、model_summary.csv、selected_coefficients.csv、rescaled_dispatches.csv、ks_diagnostic.csv和PREDICTION_REVIEW.md。说明中写清模型选择、主要预测指标及业务用途。容量组将据此决定是否继续评估近期请求特征。",
+  "关键动作": "核对观测数据的时间顺序、字段和事件计数\n按模型合同构造只读取历史bin的请求特征\n使用带offset的PoissonIRLS完成三个候选模型的前向留出拟合\n按平均留出deviance选择模型并用全量数据重估\n整理系数、重缩放结果和预测评估说明供容量组评审",
+  "评分表（直接输入内容或使用txt文档）‼️": "总分100分。\n\n检查项1：输入与时间顺序，12分\n检查项内容：使用cache_fill_bins.csv的4个字段，保留4800个bin及原始顺序，dispatch_event合计380。\n客观标准：字段集合、bin_id、time_seconds和事件计数与输入一致。\n关键字段：bin_id、time_seconds、cache_pressure、dispatch_event。\n容差：time_seconds与bin_id乘0.005的差不超过1e-12。\n失败边界：缺字段、重复或跳跃bin、调整行序、事件计数不等于380即本项失败。\n可观察证据：MATLAB程序的数据读取与输入检查逻辑，五张结果表覆盖的时间和事件范围。\n优先级：Gate项。\n层级：L3输入数据导入与完整性层。\n\n检查项2：历史特征，16分\n检查项内容：M2使用cache_pressure及前1、前2至6、前7至16个bin的请求历史。\n客观标准：三个历史特征不读取当前或未来bin，起始边界用已有历史补零。\n关键字段：dispatch_5ms、dispatch_10_30ms、dispatch_35_80ms。\n容差：整数计数必须精确一致。\n失败边界：任一特征读取当前或未来记录，或历史窗口边界错误即本项失败。\n可观察证据：MATLAB特征构造程序及重算后的设计矩阵。\n优先级：高权重项。\n层级：L4数据清洗与质量控制层。\n\n检查项3：PoissonIRLS拟合，18分\n检查项内容：三个候选模型均按合同使用log0.005作为offset，ridge系数为0.05且截距不受惩罚。\n客观标准：IRLS迭代不超过80次，收敛阈值1e-10，线性预测器截断范围为负20至20。\n关键字段：ridge_lambda、penalize_intercept、irls_max_iterations、irls_tolerance、eta_clip。\n容差：系数与Reference差不超过1e-6。\n失败边界：遗漏offset、惩罚截距、依赖随机划分或任一拟合不收敛即本项失败。\n可观察证据：MATLAB拟合程序、fold_metrics.csv和selected_coefficients.csv。\n优先级：高权重项。\n层级：L6领域计算与专业规则层。\n\n检查项4：前向留出与模型选择，18分\n检查项内容：三个候选模型分别在合同给定的3个前向折上拟合和计算Poisson deviance。\n客观标准：每折训练集是测试段之前的完整前缀，每个模型有3行结果，按平均留出deviance升序排名并唯一选择M2。\n关键字段：model、fold、train_end_bin、test_start_bin、test_end_bin、holdout_deviance、rank、selected。\n容差：deviance与Reference差不超过1e-6。\n失败边界：随机拆分、跨折沿用系数、缺少模型或折、使用训练指标选模、所选模型不是M2即本项失败。\n可观察证据：fold_metrics.csv和model_summary.csv。\n优先级：高权重项。\n层级：L8运行验证与可执行行为层。\n\n检查项5：全量模型与系数，12分\n检查项内容：使用全部4800个bin重新拟合所选M2并导出5个系数。\n客观标准：特征集合为intercept、cache_pressure、dispatch_5ms、dispatch_10_30ms、dispatch_35_80ms，只有截距的penalized为false。\n关键字段：model、feature、coefficient、penalized。\n容差：系数与Reference差不超过1e-6。\n失败边界：特征缺失、模型标识错误、惩罚标志错误或系数超出容差即本项失败。\n可观察证据：selected_coefficients.csv。\n优先级：高权重项。\n层级：L7产物结构与专业对象层。\n\n检查项6：时间缩放结果，12分\n检查项内容：按所选模型条件均值为每次填充请求计算连续区间积分和z_uniform。\n客观标准：rescaled_dispatches.csv有380行且区间首尾连续，z_uniform位于0与1之间；ks_diagnostic.csv中的事件数为380，ks_bound_95按1.36除以380平方根计算。\n关键字段：event_sequence、interval_start_bin、dispatch_bin、integrated_hazard、z_uniform、ks_d、ks_bound_95。\n容差：浮点值与Reference差不超过1e-6。\n失败边界：事件缺失、区间断裂、z_uniform越界或KS边界公式错误即本项失败。\n可观察证据：rescaled_dispatches.csv和ks_diagnostic.csv。\n优先级：普通项。\n层级：L6领域计算与专业规则层。\n\n检查项7：交付结构与说明一致性，12分\n检查项内容：完整提交MATLAB程序、5张结果CSV和PREDICTION_REVIEW.md，说明与结果表来自同一次运行。\n客观标准：说明写出M2、平均留出deviance为278.708565、事件数380、KS统计量0.058241和95%边界0.069767，并把结论限定在关联和预测表现。\n关键字段：所选模型、平均留出deviance、事件数、ks_d、ks_bound_95。\n容差：说明中的显示值按6位小数与结果表一致。\n失败边界：缺少任一交付物、说明与CSV不一致、把模型结果表述为因果效应即本项失败。\n可观察证据：output目录、PREDICTION_REVIEW.md及5张结果CSV。\n优先级：Gate项。\n层级：L9跨产物一致性与可追溯层。",
+  "本项任务的环境依赖": "操作系统： Windows11。\n\n主软件为MATLABR2025b，使用Base MATLAB运行脚本并读写CSV和JSON。辅助工具为文本编辑器和CSV查看工具。\n\nCPU使用普通双核或更高配置即可，不需要GPU。准备2GB可用磁盘，单次计算预留15分钟。输入目录保持只读，结果写入单独的output目录。",
+  "相关专业软件的关键步骤": "在MATLAB中读取cache_fill_bins.csv和model_contract.json\n按时间顺序生成缓存压力与填充请求历史特征\n使用IRLS拟合三个带offset的Poisson模型\n依次计算前向留出deviance并选择模型\n用全量数据重估所选模型并导出业务交付物",
+  "是否支持Windows": "是"
 }
